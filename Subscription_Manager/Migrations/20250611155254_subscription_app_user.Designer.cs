@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Subscription_Manager.Data;
 
@@ -10,9 +11,11 @@ using Subscription_Manager.Data;
 namespace Subscription_Manager.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250611155254_subscription_app_user")]
+    partial class subscription_app_user
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.5");
@@ -231,6 +234,9 @@ namespace Subscription_Manager.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("AppUserId")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Category")
                         .HasColumnType("TEXT");
 
@@ -253,22 +259,9 @@ namespace Subscription_Manager.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("AppUserId");
+
                     b.ToTable("Subscriptions");
-                });
-
-            modelBuilder.Entity("Subscription_Manager.Models.UserSubscription", b =>
-                {
-                    b.Property<string>("AppUserId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("SubscriptionId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("AppUserId", "SubscriptionId");
-
-                    b.HasIndex("SubscriptionId");
-
-                    b.ToTable("UserSubscriptions");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -322,33 +315,19 @@ namespace Subscription_Manager.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Subscription_Manager.Models.UserSubscription", b =>
+            modelBuilder.Entity("Subscription_Manager.Models.Subscription", b =>
                 {
                     b.HasOne("Subscription_Manager.Models.AppUser", "AppUser")
-                        .WithMany("UserSubscriptions")
+                        .WithMany("Subscriptions")
                         .HasForeignKey("AppUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Subscription_Manager.Models.Subscription", "Subscription")
-                        .WithMany("UserSubscriptions")
-                        .HasForeignKey("SubscriptionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("AppUser");
-
-                    b.Navigation("Subscription");
                 });
 
             modelBuilder.Entity("Subscription_Manager.Models.AppUser", b =>
                 {
-                    b.Navigation("UserSubscriptions");
-                });
-
-            modelBuilder.Entity("Subscription_Manager.Models.Subscription", b =>
-                {
-                    b.Navigation("UserSubscriptions");
+                    b.Navigation("Subscriptions");
                 });
 #pragma warning restore 612, 618
         }

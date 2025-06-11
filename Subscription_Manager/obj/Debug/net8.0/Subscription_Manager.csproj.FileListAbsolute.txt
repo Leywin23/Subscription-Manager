@@ -199,3 +199,4 @@ C:\Users\DESKTOP\source\repos\Subscription_Manager\Subscription_Manager\bin\Debu
 C:\Users\DESKTOP\source\repos\Subscription_Manager\Subscription_Manager\bin\Debug\net8.0\runtimes\win\lib\net6.0\System.Windows.Extensions.dll
 C:\Users\DESKTOP\source\repos\Subscription_Manager\Subscription_Manager\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
 C:\Users\DESKTOP\source\repos\Subscription_Manager\Subscription_Manager\bin\Debug\net8.0\Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll
+C:\Users\DESKTOP\source\repos\Subscription_Manager\Subscription_Manager\obj\Debug\net8.0\Subscription_Manager.sourcelink.json

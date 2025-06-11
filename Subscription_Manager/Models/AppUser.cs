@@ -3,6 +3,6 @@ namespace Subscription_Manager.Models
 {
     public class AppUser: IdentityUser
     {
-        public List<Subscription> Subscriptions = new List<Subscription>();
+        public ICollection<UserSubscription> UserSubscriptions { get; set; } = new List<UserSubscription>();
     }
 }

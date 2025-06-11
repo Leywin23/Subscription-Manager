@@ -12,12 +12,13 @@ namespace Subscription_Manager.Data
         public AppDbContext(DbContextOptions<AppDbContext> options):base(options){}
 
         public DbSet<Subscription> Subscriptions {  get; set; }
+        public DbSet<UserSubscription> UserSubscriptions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
             SeedRoles(builder);
-            ConfigureSubscription(builder);
+            ConfigureUserSubscription(builder);
         }
         private void SeedRoles(ModelBuilder builder)
         {
@@ -40,13 +41,22 @@ namespace Subscription_Manager.Data
             };
                 builder.Entity<IdentityRole>().HasData(roles);
         }
-        private void ConfigureSubscription(ModelBuilder builder) {
-            builder.Entity<Subscription>()
-                .HasOne(s=>s.AppUser)
-                .WithMany(u=>u.Subscriptions)
-                .HasForeignKey(s=>s.AppUserId)
-                .OnDelete(DeleteBehavior.Restrict);
+        private void ConfigureUserSubscription(ModelBuilder builder)
+        {
+            builder.Entity<UserSubscription>()
+                .HasKey(us => new { us.AppUserId, us.SubscriptionId });
+
+            builder.Entity<UserSubscription>()
+                .HasOne(us => us.AppUser)
+                .WithMany(u => u.UserSubscriptions)
+                .HasForeignKey(us => us.AppUserId);
+
+            builder.Entity<UserSubscription>()
+                .HasOne(us => us.Subscription)
+                .WithMany(s => s.UserSubscriptions)
+                .HasForeignKey(us => us.SubscriptionId);
         }
+
 
 
     }
