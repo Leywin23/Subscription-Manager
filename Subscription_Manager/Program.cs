@@ -8,6 +8,8 @@ using Microsoft.IdentityModel.Tokens.Experimental;
 using Subscription_Manager.Interfaces;
 using Subscription_Manager.Service;
 using Microsoft.OpenApi.Models;
+using System.Text.Json.Serialization;
+using Subscription_Manager.Repository;
 
 
 namespace Subscription_Manager
@@ -56,6 +58,8 @@ namespace Subscription_Manager
             options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             builder.Services.AddScoped<ITokenService, TokenService>();
+            builder.Services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
+
 
             builder.Services.AddSwaggerGen(options =>
             {
@@ -82,7 +86,14 @@ namespace Subscription_Manager
                 });
             });
 
-                var app = builder.Build();
+            builder.Services.AddControllers()
+            .AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+            });
+
+            var app = builder.Build();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

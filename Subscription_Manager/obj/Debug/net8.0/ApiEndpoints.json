@@ -38,7 +38,13 @@
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
-    "Parameters": [],
+    "Parameters": [
+      {
+        "Name": "SubscriptionName",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
     "ReturnTypes": []
   },
   {
@@ -99,6 +105,22 @@
     "Method": "AssignSubscriptionToUser",
     "RelativePath": "api/Subscription/assign/{subscriptionId}",
     "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "subscriptionId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Subscription_Manager.Controllers.SubscriptionController",
+    "Method": "RemoveSubscriptionFromAccount",
+    "RelativePath": "api/Subscription/assign/{subscriptionId}",
+    "HttpMethod": "DELETE",
     "IsController": true,
     "Order": 0,
     "Parameters": [
