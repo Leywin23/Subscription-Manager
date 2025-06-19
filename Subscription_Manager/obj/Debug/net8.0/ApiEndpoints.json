@@ -32,6 +32,16 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "Subscription_Manager.Controllers.AccountController",
+    "Method": "GetUserData",
+    "RelativePath": "api/Account/userdata",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "Subscription_Manager.Controllers.SubscriptionController",
     "Method": "GetAllSubscriptions",
     "RelativePath": "api/Subscription",

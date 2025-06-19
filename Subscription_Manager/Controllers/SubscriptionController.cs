@@ -20,6 +20,7 @@ namespace Subscription_Manager.Controllers
         private readonly AppDbContext _context;
         private readonly ISubscriptionRepository _subRepo;
 
+
         public SubscriptionController(AppDbContext context, ISubscriptionRepository subRepo)
         {
             _context = context;

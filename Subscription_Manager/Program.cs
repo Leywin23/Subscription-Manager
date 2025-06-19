@@ -59,6 +59,7 @@ namespace Subscription_Manager
 
             builder.Services.AddScoped<ITokenService, TokenService>();
             builder.Services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
+            builder.Services.AddScoped<IUserService, UserService>();
 
 
             builder.Services.AddSwaggerGen(options =>

@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Subscription_Manager.Data;
 using Subscription_Manager.Dtos.Account;
 using Subscription_Manager.Interfaces;
 using Subscription_Manager.Models;
+using System.Security.Claims;
 
 namespace Subscription_Manager.Controllers
 {
@@ -16,13 +18,15 @@ namespace Subscription_Manager.Controllers
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
         private readonly ITokenService _tokenService;
+        private readonly IUserService _userService;
 
-        public AccountController(UserManager<AppUser> userManager, ITokenService tokenService, SignInManager<AppUser> signInManager, AppDbContext context)
+        public AccountController(UserManager<AppUser> userManager, ITokenService tokenService, SignInManager<AppUser> signInManager, AppDbContext context, IUserService userService)
         {
             _tokenService = tokenService;
             _userManager = userManager;
             _signInManager = signInManager;
             _context = context;
+            _userService = userService;
         }
 
         [HttpPost("register")]
@@ -102,6 +106,22 @@ namespace Subscription_Manager.Controllers
             {
                 return StatusCode(500, new { error = "An unexpected error occurred." });
             }
+        }
+
+        [HttpPost("userdata")]
+        [Authorize]
+        public async Task<IActionResult> GetUserData() {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized("User ID not found in token.");
+
+            var result = await _userService.GetUserSubscriptionOverviewAsync(userId);
+
+            if (result == null)
+                return NotFound("User not found.");
+
+            return Ok(result);
+
         }
     }
 }
