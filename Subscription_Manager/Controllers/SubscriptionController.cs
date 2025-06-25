@@ -9,6 +9,7 @@ using Subscription_Manager.Helpers;
 using Subscription_Manager.Interfaces;
 using Subscription_Manager.Models;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.Security.Claims;
 
 namespace Subscription_Manager.Controllers
@@ -61,7 +62,32 @@ namespace Subscription_Manager.Controllers
                 return StatusCode(500, "An error occurred while retrieving subscription");
             }
         }
+        //[HttpPost]
+        //public async Task<IActionResult> AddSubscription([FromBody] SubscriptionDto subscriptionDto)
+        //{
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return BadRequest(ModelState);
+        //    }
+
+        //    var subscription = new Subscription
+        //    {
+        //        ServiceName = subscriptionDto.ServiceName,
+        //        Cost = subscriptionDto.Cost,
+        //        Frequency = subscriptionDto.Frequency,
+        //        StartDate = DateTime.Now,
+        //        Description = subscriptionDto.Description,
+        //        Category = subscriptionDto.Category,
+        //    };
+
+        //    await _context.Subscriptions.AddAsync(subscription);
+        //    await _context.SaveChangesAsync();
+
+        //    return Ok(subscription);
+        //}
+
         [HttpPost]
+        [Authorize] // <--- DODAJ TEN ATRYBUT
         public async Task<IActionResult> AddSubscription([FromBody] SubscriptionDto subscriptionDto)
         {
             if (!ModelState.IsValid)
@@ -69,37 +95,73 @@ namespace Subscription_Manager.Controllers
                 return BadRequest(ModelState);
             }
 
+            // 1. Pobierz ID zalogowanego użytkownika z tokenu
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                // To nie powinno się zdarzyć z [Authorize], ale to dobre zabezpieczenie
+                return Unauthorized("Użytkownik nie jest zalogowany lub ID użytkownika nie znaleziono w tokenie.");
+            }
+
+            // 2. Utwórz nową subskrypcję
             var subscription = new Subscription
             {
                 ServiceName = subscriptionDto.ServiceName,
                 Cost = subscriptionDto.Cost,
                 Frequency = subscriptionDto.Frequency,
-                StartDate = DateTime.Now,
+                StartDate = DateTime.Now, // Użyj DateTime.Now dla nowej subskrypcji
                 Description = subscriptionDto.Description,
                 Category = subscriptionDto.Category,
             };
 
             await _context.Subscriptions.AddAsync(subscription);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(); // Zapisz subskrypcję, aby otrzymała ID
 
-            return Ok(subscription);
+            // 3. Utwórz powiązanie subskrypcji z użytkownikiem
+            var userSubscription = new UserSubscription
+            {
+                AppUserId = userId,
+                SubscriptionId = subscription.Id // Użyj ID nowo utworzonej subskrypcji
+            };
+
+            await _context.UserSubscriptions.AddAsync(userSubscription);
+            await _context.SaveChangesAsync(); // Zapisz powiązanie
+
+            // Możesz zwrócić pełny obiekt Subskrypcji, włącznie z ID
+            // Możesz też użyć CreatedAtAction, co jest bardziej typowe dla POST, zwracając 201 Created
+            return CreatedAtAction(nameof(AddSubscription), new { id = subscription.Id }, new SubscriptionDto
+            {
+                id = subscription.Id,
+                ServiceName = subscription.ServiceName,
+                Cost = subscription.Cost,
+                Frequency = subscription.Frequency,
+                StartDate = subscription.StartDate,
+                Description = subscription.Description,
+                Category = subscription.Category,
+                // Nie zwracamy tutaj Userów, bo to Subskrypcja, a nie dane użytkownika
+            });
         }
         [HttpDelete("{id:int}")]
+        [Authorize]
         public async Task<IActionResult> DeleteSubscription(int id)
         {
+            Debug.WriteLine($"[SubscriptionController] -> DeleteSubscription called for ID: {id}"); // Dodaj to!
             var subscription = await _context.Subscriptions.FindAsync(id);
             if (subscription == null)
             {
+                Debug.WriteLine($"[SubscriptionController] Subscription with ID: {id} NOT FOUND in DB."); // Dodaj to!
                 return NotFound($"Subscription with id {id} not found.");
             }
-
+            Debug.WriteLine($"[SubscriptionController] Found subscription ID: {id}. Preparing to remove."); // Dodaj to!
             _context.Subscriptions.Remove(subscription);
             await _context.SaveChangesAsync();
+            Debug.WriteLine($"[SubscriptionController] Subscription ID: {id} successfully deleted from DB."); // Dodaj to!
 
             return NoContent();
         }
 
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> EditSubscription(int id, [FromBody] SubscriptionDto subscriptionDto)
         {
             var subscription = await _context.Subscriptions
