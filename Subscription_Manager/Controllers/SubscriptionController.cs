@@ -87,7 +87,7 @@ namespace Subscription_Manager.Controllers
         //}
 
         [HttpPost]
-        [Authorize] // <--- DODAJ TEN ATRYBUT
+        [Authorize] 
         public async Task<IActionResult> AddSubscription([FromBody] SubscriptionDto subscriptionDto)
         {
             if (!ModelState.IsValid)
@@ -95,40 +95,35 @@ namespace Subscription_Manager.Controllers
                 return BadRequest(ModelState);
             }
 
-            // 1. Pobierz ID zalogowanego użytkownika z tokenu
+          
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userId))
             {
-                // To nie powinno się zdarzyć z [Authorize], ale to dobre zabezpieczenie
                 return Unauthorized("Użytkownik nie jest zalogowany lub ID użytkownika nie znaleziono w tokenie.");
             }
 
-            // 2. Utwórz nową subskrypcję
             var subscription = new Subscription
             {
                 ServiceName = subscriptionDto.ServiceName,
                 Cost = subscriptionDto.Cost,
                 Frequency = subscriptionDto.Frequency,
-                StartDate = DateTime.Now, // Użyj DateTime.Now dla nowej subskrypcji
+                StartDate = DateTime.Now, 
                 Description = subscriptionDto.Description,
                 Category = subscriptionDto.Category,
             };
 
             await _context.Subscriptions.AddAsync(subscription);
-            await _context.SaveChangesAsync(); // Zapisz subskrypcję, aby otrzymała ID
+            await _context.SaveChangesAsync(); 
 
-            // 3. Utwórz powiązanie subskrypcji z użytkownikiem
             var userSubscription = new UserSubscription
             {
                 AppUserId = userId,
-                SubscriptionId = subscription.Id // Użyj ID nowo utworzonej subskrypcji
+                SubscriptionId = subscription.Id
             };
 
             await _context.UserSubscriptions.AddAsync(userSubscription);
-            await _context.SaveChangesAsync(); // Zapisz powiązanie
+            await _context.SaveChangesAsync(); 
 
-            // Możesz zwrócić pełny obiekt Subskrypcji, włącznie z ID
-            // Możesz też użyć CreatedAtAction, co jest bardziej typowe dla POST, zwracając 201 Created
             return CreatedAtAction(nameof(AddSubscription), new { id = subscription.Id }, new SubscriptionDto
             {
                 id = subscription.Id,
@@ -138,24 +133,23 @@ namespace Subscription_Manager.Controllers
                 StartDate = subscription.StartDate,
                 Description = subscription.Description,
                 Category = subscription.Category,
-                // Nie zwracamy tutaj Userów, bo to Subskrypcja, a nie dane użytkownika
             });
         }
         [HttpDelete("{id:int}")]
         [Authorize]
         public async Task<IActionResult> DeleteSubscription(int id)
         {
-            Debug.WriteLine($"[SubscriptionController] -> DeleteSubscription called for ID: {id}"); // Dodaj to!
+            Debug.WriteLine($"[SubscriptionController] -> DeleteSubscription called for ID: {id}"); 
             var subscription = await _context.Subscriptions.FindAsync(id);
             if (subscription == null)
             {
-                Debug.WriteLine($"[SubscriptionController] Subscription with ID: {id} NOT FOUND in DB."); // Dodaj to!
+                Debug.WriteLine($"[SubscriptionController] Subscription with ID: {id} NOT FOUND in DB."); 
                 return NotFound($"Subscription with id {id} not found.");
             }
-            Debug.WriteLine($"[SubscriptionController] Found subscription ID: {id}. Preparing to remove."); // Dodaj to!
+            Debug.WriteLine($"[SubscriptionController] Found subscription ID: {id}. Preparing to remove.");
             _context.Subscriptions.Remove(subscription);
             await _context.SaveChangesAsync();
-            Debug.WriteLine($"[SubscriptionController] Subscription ID: {id} successfully deleted from DB."); // Dodaj to!
+            Debug.WriteLine($"[SubscriptionController] Subscription ID: {id} successfully deleted from DB.");
 
             return NoContent();
         }
@@ -172,7 +166,6 @@ namespace Subscription_Manager.Controllers
                 return NotFound($"Subscription with ID {id} not found.");
             }
 
-            // Aktualizacja danych subskrypcji, w tym tytułu
             subscription.ServiceName = subscriptionDto.ServiceName;
             subscription.Cost = subscriptionDto.Cost;
             subscription.Frequency = subscriptionDto.Frequency;

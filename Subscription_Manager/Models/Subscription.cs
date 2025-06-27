@@ -11,7 +11,15 @@ namespace Subscription_Manager.Models
         [Required]
         public string ServiceName { get; set; }
         [Required]
-        public decimal Cost {  get; set; }
+        private decimal _cost;
+
+        [Required]
+        public decimal Cost
+        {
+            get => _cost;
+            set => _cost = Math.Round(value, 2); 
+        }
+
         [Required]
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public SubscriptionType Frequency {  get; set; }
@@ -28,4 +36,5 @@ namespace Subscription_Manager.Models
         Monthly = 1,
         Yearly = 2
     }
+
 }
